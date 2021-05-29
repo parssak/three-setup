@@ -13,7 +13,7 @@ export default class Scene {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.container = document.getElementById('container')
     this.container.appendChild(this.renderer.domElement)
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20000);
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 20000);
     
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.autoRotate = false;
@@ -25,6 +25,11 @@ export default class Scene {
     window.addEventListener('resize', () => this._Resize())
 
     this.scene = new THREE.Scene();
+    const ambientLight = new THREE.AmbientLight(0x041f60);
+    ambientLight.intensity = 0.3;
+    this.scene.add(ambientLight);
+    this.scene.fog = new THREE.Fog(0x041f60, 3000, 20000);
+
 
     this.renderer.setAnimationLoop(time => this.Update(time))
   }
@@ -55,12 +60,12 @@ export default class Scene {
 
   Update(time) {
     this.controls.update()
-    this.entities.forEach(entity => entity.Update(time));
+    this.entities.forEach(entity => !entity.inGroup && entity.Update(time));
     this.renderer.render(this.scene, this.camera);
   }
 }
 
-const scene = new Scene();
+export const scene = new Scene();
 
 /**
  * Abstract Class Entity.

@@ -38172,7 +38172,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Entity = exports.default = void 0;
+exports.Entity = exports.scene = exports.default = void 0;
 
 var THREE = _interopRequireWildcard(require("three"));
 
@@ -38208,7 +38208,7 @@ var Scene = /*#__PURE__*/function () {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.container = document.getElementById('container');
     this.container.appendChild(this.renderer.domElement);
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20000);
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 20000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.autoRotate = false;
     this.controls.enableDamping = true;
@@ -38220,6 +38220,10 @@ var Scene = /*#__PURE__*/function () {
       return _this._Resize();
     });
     this.scene = new THREE.Scene();
+    var ambientLight = new THREE.AmbientLight(0x041f60);
+    ambientLight.intensity = 0.3;
+    this.scene.add(ambientLight);
+    this.scene.fog = new THREE.Fog(0x041f60, 3000, 20000);
     this.renderer.setAnimationLoop(function (time) {
       return _this.Update(time);
     });
@@ -38254,7 +38258,7 @@ var Scene = /*#__PURE__*/function () {
     value: function Update(time) {
       this.controls.update();
       this.entities.forEach(function (entity) {
-        return entity.Update(time);
+        return !entity.inGroup && entity.Update(time);
       });
       this.renderer.render(this.scene, this.camera);
     }
@@ -38270,6 +38274,8 @@ var scene = new Scene();
  *
  * @class Entity
  */
+
+exports.scene = scene;
 
 var Entity = /*#__PURE__*/function () {
   function Entity() {
@@ -38388,7 +38394,6 @@ var Agent = /*#__PURE__*/function (_Entity) {
   }, {
     key: "Update",
     value: function Update(time) {
-      console.log('my update ran', this.id);
       var maxSpeed = this.maxSpeed; // boost
 
       this.ApplyForce(this.boost);
@@ -38440,13 +38445,29 @@ var Boid = /*#__PURE__*/function (_Entity2) {
 
   var _super2 = _createSuper(Boid);
 
-  function Boid() {
+  function Boid(count) {
     var _this2;
 
     _classCallCheck(this, Boid);
 
     _this2 = _super2.call(this);
-    _this2.count = 10;
+    _this2.params = {
+      maxSpeed: 7,
+      seek: {
+        maxForce: 0.04
+      },
+      align: {
+        effectiveRange: 85,
+        maxForce: 0.16
+      },
+      separate: {
+        effectiveRange: 70,
+        maxForce: 0.2
+      },
+      choesin: {
+        effectiveRange: 200
+      }
+    };
     return _this2;
   }
 
@@ -38459,20 +38480,147 @@ var Boid = /*#__PURE__*/function (_Entity2) {
     key: "BuildMesh",
     value: function BuildMesh() {
       this.group = new THREE.Group();
+      this.count = 10;
       this.agents = [];
 
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < this.count; i++) {
         var agent = new Agent();
         this.group.add(agent.mesh);
         this.agents.push(agent);
       }
+    }
+  }, {
+    key: "Update",
+    value: function Update() {
+      var _this3 = this;
+
+      this.agents.forEach(function (agent) {
+        agent.ApplyForce(_this3.Align(agent));
+        agent.ApplyForce(_this3.Separate(agent));
+        agent.ApplyForce(_this3.Cohesion(agent));
+        agent.Update();
+      });
+
+      _get(_getPrototypeOf(Boid.prototype), "Update", this).call(this);
+    }
+  }, {
+    key: "Align",
+    value: function Align(currAgent) {
+      var sumVec = new THREE.Vector3();
+      var count = 0;
+      var maxSpeed = this.params.maxSpeed;
+      ;
+      var maxForce = this.params.align.maxForce;
+      var effectiveRange = this.params.align.effectiveRange;
+      var steer = new THREE.Vector3();
+      this.agents.forEach(function (otherAgent) {
+        var dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+
+        if (dist > 0 && dist < effectiveRange) {
+          sumVec.add(otherAgent.velocity);
+          count++;
+        }
+      });
+
+      if (count > 0) {
+        sumVec.divideScalar(count);
+        sumVec.normalize();
+        sumVec.multiplyScalar(maxSpeed);
+        steer.subVectors(sumVec, currAgent.velocity);
+
+        if (steer.length() > maxForce) {
+          steer.clampLength(0, maxForce);
+        }
+      }
+
+      return steer;
+    }
+  }, {
+    key: "Separate",
+    value: function Separate(currAgent) {
+      var sumVec = new THREE.Vector3();
+      var count = 0;
+      var maxSpeed = this.params.maxSpeed;
+      var maxForce = this.params.separate.maxForce;
+      var effectiveRange = this.params.separate.effectiveRange;
+      var steer = new THREE.Vector3();
+      this.agents.forEach(function (otherAgent) {
+        var dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+
+        if (dist > 0 && dist < effectiveRange) {
+          var closeVec = new THREE.Vector3();
+          closeVec.subVectors(currAgent.mesh.position, otherAgent.mesh.position);
+          closeVec.normalize();
+          closeVec.divideScalar(dist);
+          sumVec.add(closeVec);
+          count++;
+        }
+      });
+
+      if (count > 0) {
+        sumVec.divideScalar(count);
+        sumVec.normalize();
+        sumVec.multiplyScalar(maxSpeed);
+        steer.subVectors(sumVec, currAgent.velocity);
+
+        if (steer.length() > maxForce) {
+          steer.clampLength(0, maxForce);
+        }
+      }
+
+      return steer;
+    }
+  }, {
+    key: "Seek",
+    value: function Seek(currAgent) {
+      var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new THREE.Vector3();
+      var maxSpeed = this.params.maxSpeed;
+      ;
+      var maxForce = this.params.seek.maxForce;
+      var toGoalVector = new THREE.Vector3();
+      toGoalVector.subVectors(target, currAgent.mesh.position);
+      var distance = toGoalVector.length();
+      toGoalVector.normalize();
+      toGoalVector.multiplyScalar(maxSpeed);
+      var steerVector = new THREE.Vector3();
+      steerVector.subVectors(toGoalVector, currAgent.velocity); // limit force
+
+      if (steerVector.length() > maxForce) {
+        steerVector.clampLength(0, maxForce);
+      }
+
+      return steerVector;
+    }
+  }, {
+    key: "Cohesion",
+    value: function Cohesion(currAgent) {
+      var sumVector = new THREE.Vector3();
+      var count = 0;
+      var effectiveRange = this.params.choesin.effectiveRange;
+      var steerVector = new THREE.Vector3();
+      this.agents.forEach(function (otherAgent) {
+        var dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+
+        if (dist > 0 && dist < effectiveRange) {
+          sumVector.add(otherAgent.mesh.position);
+          count++;
+        }
+      });
+
+      if (count > 0) {
+        sumVector.divideScalar(count);
+        steerVector.add(this.Seek(currAgent, sumVector));
+      }
+
+      return steerVector;
     }
   }]);
 
   return Boid;
 }(_setup.Entity);
 
-new Boid();
+new Boid(); // new Boid();
+// new Boid();
 },{"three":"../node_modules/three/build/three.module.js","./setup":"setup.js"}],"../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
