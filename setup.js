@@ -53,16 +53,20 @@ export class Entity {
     this.Start()
   }
 
-  Start() {
-    this.BuildMesh()
-    this.scene.Add(this.mesh)
-  }
-
+  // Use this to define the mesh of the Entity
   BuildMesh() {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
   }
 
+  // Called once on initialization
+  Start() {
+    this.BuildMesh()
+    this.scene.Add(this.mesh)
+  }
+
+  
+  // Called every frame
   Update(time) {
     this.renderer.render(this.scene.scene, this.scene.camera)
   }
