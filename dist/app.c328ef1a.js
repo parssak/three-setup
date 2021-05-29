@@ -38374,7 +38374,7 @@ var Agent = /*#__PURE__*/function (_Entity) {
     _this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
     _this.acceleration = new THREE.Vector3();
     _this.wonderTheta = 0;
-    _this.maxSpeed = 2;
+    _this.maxSpeed = 10;
     _this.boost = new THREE.Vector3();
     return _this;
   }
@@ -38425,7 +38425,7 @@ var Agent = /*#__PURE__*/function (_Entity) {
   }, {
     key: "BuildMesh",
     value: function BuildMesh() {
-      this.geometry = new THREE.CylinderGeometry(0, 1, 2, 20);
+      this.geometry = new THREE.CylinderGeometry(0, 2, 4, 5);
       this.geometry.rotateX(THREE.Math.degToRad(90));
       this.material = new THREE.MeshNormalMaterial();
       this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -38480,7 +38480,7 @@ var Boid = /*#__PURE__*/function (_Entity2) {
     key: "BuildMesh",
     value: function BuildMesh() {
       this.group = new THREE.Group();
-      this.count = 10;
+      this.count = 50;
       this.agents = [];
 
       for (var i = 0; i < this.count; i++) {
@@ -38498,6 +38498,7 @@ var Boid = /*#__PURE__*/function (_Entity2) {
         agent.ApplyForce(_this3.Align(agent));
         agent.ApplyForce(_this3.Separate(agent));
         agent.ApplyForce(_this3.Cohesion(agent));
+        agent.ApplyForce(_this3.AvoidBoxContainer(agent, 300, 300, 300));
         agent.Update();
       });
 
@@ -38614,11 +38615,49 @@ var Boid = /*#__PURE__*/function (_Entity2) {
 
       return steerVector;
     }
+  }, {
+    key: "Avoid",
+    value: function Avoid(currentCreature) {
+      var wall = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new THREE.Vector3();
+      currentCreature.mesh.geometry.computeBoundingSphere();
+      var boundingSphere = currentCreature.mesh.geometry.boundingSphere;
+      var toMeVector = new THREE.Vector3();
+      toMeVector.subVectors(currentCreature.mesh.position, wall);
+      var distance = toMeVector.length() - boundingSphere.radius * 2;
+      var steerVector = toMeVector.clone();
+      steerVector.normalize();
+      steerVector.multiplyScalar(1 / Math.pow(distance, 2));
+      return steerVector;
+    }
+  }, {
+    key: "AvoidBoxContainer",
+    value: function AvoidBoxContainer(currentCreature) {
+      var rangeWidth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 80;
+      var rangeHeight = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 80;
+      var rangeDepth = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 80;
+      var sumVector = new THREE.Vector3();
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
+      sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
+      sumVector.multiplyScalar(Math.pow(currentCreature.velocity.length(), 3));
+      return sumVector;
+    }
   }]);
 
   return Boid;
 }(_setup.Entity);
 
+var resetDescription = null;
+window.addEventListener('mousemove', function () {
+  document.getElementById('description').className = "dimmed";
+  if (resetDescription !== null) clearTimeout(resetDescription);
+  resetDescription = setTimeout(function () {
+    document.getElementById('description').className = "";
+  }, 2000);
+});
 new Boid(); // new Boid();
 // new Boid();
 },{"three":"../node_modules/three/build/three.module.js","./setup":"setup.js"}],"../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -38649,7 +38688,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58637" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60520" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

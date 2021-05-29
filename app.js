@@ -9,7 +9,7 @@ class Agent extends Entity {
         this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
         this.acceleration = new THREE.Vector3();
         this.wonderTheta = 0;
-        this.maxSpeed = 2;
+        this.maxSpeed = 10;
         this.boost = new THREE.Vector3();
     }
 
@@ -57,7 +57,7 @@ class Agent extends Entity {
     }
 
     BuildMesh() {
-        this.geometry = new THREE.CylinderGeometry(0, 1, 2, 20);
+        this.geometry = new THREE.CylinderGeometry(0, 2, 4, 5);
         this.geometry.rotateX(THREE.Math.degToRad(90))
         this.material = new THREE.MeshNormalMaterial();
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -99,7 +99,7 @@ class Boid extends Entity {
 
     BuildMesh() {
         this.group = new THREE.Group();
-        this.count = 10;
+        this.count = 50;
         this.agents = [];
 
         for (let i = 0; i < this.count; i++) {
@@ -114,6 +114,7 @@ class Boid extends Entity {
             agent.ApplyForce(this.Align(agent));
             agent.ApplyForce(this.Separate(agent));
             agent.ApplyForce(this.Cohesion(agent));
+            agent.ApplyForce(this.AvoidBoxContainer(agent, 300, 300, 300));
             agent.Update();
         });
         super.Update();
@@ -221,8 +222,40 @@ class Boid extends Entity {
         return steerVector;
     }
 
+    Avoid(currentCreature, wall = new THREE.Vector3()) {
+        currentCreature.mesh.geometry.computeBoundingSphere();
+        const boundingSphere = currentCreature.mesh.geometry.boundingSphere;
+
+        const toMeVector = new THREE.Vector3();
+        toMeVector.subVectors(currentCreature.mesh.position, wall);
+
+        const distance = toMeVector.length() - boundingSphere.radius * 2;
+        const steerVector = toMeVector.clone();
+        steerVector.normalize();
+        steerVector.multiplyScalar(1 / (Math.pow(distance, 2)));
+        return steerVector;
+    }
+
+    AvoidBoxContainer(currentCreature, rangeWidth = 80, rangeHeight = 80, rangeDepth = 80) {
+        const sumVector = new THREE.Vector3();
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
+        sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
+        sumVector.multiplyScalar(Math.pow(currentCreature.velocity.length(), 3));
+        return sumVector;
+    }
+
 }
 
+let resetDescription = null;
+window.addEventListener('mousemove', () => {
+    document.getElementById('description').className = "dimmed"
+    if (resetDescription !== null) clearTimeout(resetDescription);
+    resetDescription = setTimeout(() => { document.getElementById('description').className = ""}, 2000)
+})
 
 new Boid();
 // new Boid();
