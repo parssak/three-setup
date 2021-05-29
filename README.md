@@ -18,7 +18,7 @@ Make sure Parcel is installed on your machine, if you don't have Parcel, go to h
 
 To run the project: 
 ```
-  parcel index.html
+ $ parcel index.html
 ```
 
 `Start()`: This is called at initialization, and should include any additional logic needed when adding that entity to the scene. __Do not include logic in `Start()` for adding/creating the Entity mesh to the Scene, that is handled by the entitu class.__ For creating the mesh
