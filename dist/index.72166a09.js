@@ -606,56 +606,54 @@ class Boid extends _setupDefault.default {
     const maxForce = this.params.seek.maxForce;
     const toGoalVector = new THREE.Vector3();
     toGoalVector.subVectors(target, currAgent.mesh.position);
-    const distance = toGoalVector.length();
     toGoalVector.normalize();
     toGoalVector.multiplyScalar(maxSpeed);
-    const steerVector = new THREE.Vector3();
-    steerVector.subVectors(toGoalVector, currAgent.velocity);
-    // limit force
-    if (steerVector.length() > maxForce) {
-      steerVector.clampLength(0, maxForce);
+    const steer = new THREE.Vector3();
+    steer.subVectors(toGoalVector, currAgent.velocity);
+    if (steer.length() > maxForce) {
+      steer.clampLength(0, maxForce);
     }
-    return steerVector;
+    return steer;
   }
   Cohesion(currAgent) {
-    const sumVector = new THREE.Vector3();
+    const sumVec = new THREE.Vector3();
     let count = 0;
     const effectiveRange = this.params.choesin.effectiveRange;
-    const steerVector = new THREE.Vector3();
+    const steer = new THREE.Vector3();
     this.agents.forEach(otherAgent => {
       const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
       if (dist > 0 && dist < effectiveRange) {
-        sumVector.add(otherAgent.mesh.position);
+        sumVec.add(otherAgent.mesh.position);
         count++;
       }
     });
     if (count > 0) {
-      sumVector.divideScalar(count);
-      steerVector.add(this.Seek(currAgent, sumVector));
+      sumVec.divideScalar(count);
+      steer.add(this.Seek(currAgent, sumVec));
     }
-    return steerVector;
+    return steer;
   }
-  Avoid(currentCreature, wall = new THREE.Vector3()) {
-    currentCreature.mesh.geometry.computeBoundingSphere();
-    const boundingSphere = currentCreature.mesh.geometry.boundingSphere;
-    const toMeVector = new THREE.Vector3();
-    toMeVector.subVectors(currentCreature.mesh.position, wall);
-    const distance = toMeVector.length() - boundingSphere.radius * 2;
-    const steerVector = toMeVector.clone();
-    steerVector.normalize();
-    steerVector.multiplyScalar(1 / Math.pow(distance, 2));
-    return steerVector;
+  Avoid(currAgent, wall = new THREE.Vector3()) {
+    currAgent.mesh.geometry.computeBoundingSphere();
+    const boundingSphere = currAgent.mesh.geometry.boundingSphere;
+    const closeVec = new THREE.Vector3();
+    closeVec.subVectors(currAgent.mesh.position, wall);
+    const distance = closeVec.length() - boundingSphere.radius * 2;
+    const steer = closeVec.clone();
+    steer.normalize();
+    steer.multiplyScalar(1 / Math.pow(distance, 2));
+    return steer;
   }
-  AvoidBoxContainer(currentCreature, rangeWidth = 80, rangeHeight = 80, rangeDepth = 80) {
-    const sumVector = new THREE.Vector3();
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
-    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
-    sumVector.multiplyScalar(Math.pow(currentCreature.velocity.length(), 3));
-    return sumVector;
+  AvoidBoxContainer(currAgent, rangeWidth = 80, rangeHeight = 80, rangeDepth = 80) {
+    const sumVec = new THREE.Vector3();
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(rangeWidth, currAgent.mesh.position.y, currAgent.mesh.position.z)));
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(-rangeWidth, currAgent.mesh.position.y, currAgent.mesh.position.z)));
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(currAgent.mesh.position.x, rangeHeight, currAgent.mesh.position.z)));
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(currAgent.mesh.position.x, -rangeHeight, currAgent.mesh.position.z)));
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(currAgent.mesh.position.x, currAgent.mesh.position.y, rangeDepth)));
+    sumVec.add(this.Avoid(currAgent, new THREE.Vector3(currAgent.mesh.position.x, currAgent.mesh.position.y, -rangeDepth)));
+    sumVec.multiplyScalar(Math.pow(currAgent.velocity.length(), 3));
+    return sumVec;
   }
 }
 new Boid();
