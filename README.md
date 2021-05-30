@@ -39,7 +39,7 @@ To run in development:
 
 To make a production build:
 ```
- $ npm run dev
+ $ npm run prod
 ```
 The production build will be in /dist.
 
