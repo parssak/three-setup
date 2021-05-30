@@ -444,14 +444,16 @@ id) /*: string*/
 },{}],"5XPnV":[function(require,module,exports) {
 var _three = require('three');
 var _setup = require('./setup');
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+var _setupDefault = _parcelHelpers.interopDefault(_setup);
 const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
-class Agent extends _setup.Entity {
+class Agent extends _setupDefault.default {
   constructor() {
     super(true);
     this.velocity = new _three.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
     this.acceleration = new _three.Vector3();
     this.wonderTheta = 0;
-    this.maxSpeed = 10;
+    this.maxSpeed = 1;
     this.boost = new _three.Vector3();
   }
   Start() {
@@ -489,7 +491,7 @@ class Agent extends _setup.Entity {
     super.Update(time);
   }
   BuildMesh() {
-    this.geometry = new _three.CylinderGeometry(0, 2, 4, 5);
+    this.geometry = new _three.CylinderGeometry(0, 4, 8, 10);
     this.geometry.rotateX(_three.Math.degToRad(90));
     this.material = new _three.MeshNormalMaterial();
     this.mesh = new _three.Mesh(this.geometry, this.material);
@@ -498,7 +500,7 @@ class Agent extends _setup.Entity {
     this.acceleration.add(f.clone());
   }
 }
-class Boid extends _setup.Entity {
+class Boid extends _setupDefault.default {
   constructor(count) {
     super();
     this.params = {
@@ -537,7 +539,7 @@ class Boid extends _setup.Entity {
       agent.ApplyForce(this.Align(agent));
       agent.ApplyForce(this.Separate(agent));
       agent.ApplyForce(this.Cohesion(agent));
-      agent.ApplyForce(this.AvoidBoxContainer(agent, 160, 160, 160));
+      agent.ApplyForce(this.AvoidBoxContainer(agent, 300, 300, 300));
       agent.Update();
     });
     super.Update();
@@ -655,24 +657,17 @@ class Boid extends _setup.Entity {
     return sumVector;
   }
 }
-let resetDescription = null;
 window.addEventListener('mousedown', () => {
   document.getElementById('description').className = "dimmed";
-  if (resetDescription !== null) clearTimeout(resetDescription);
-  resetDescription = setTimeout(() => {
-    document.getElementById('description').className = "";
-  }, 2000);
 });
+window.addEventListener('mouseup', () => document.getElementById('description').className = "");
 new Boid();
 
-},{"./setup":"5Pmov","three":"17Pzd"}],"5Pmov":[function(require,module,exports) {
+},{"./setup":"5Pmov","three":"17Pzd","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"5Pmov":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 _parcelHelpers.export(exports, "scene", function () {
   return scene;
-});
-_parcelHelpers.export(exports, "Entity", function () {
-  return Entity;
 });
 var _three = require('three');
 var _threeOrbitControls = require('three-orbit-controls');
@@ -805,6 +800,7 @@ class Entity {
   /*Called every frame*/
   Update(time) {}
 }
+exports.default = Entity;
 
 },{"three":"17Pzd","three-orbit-controls":"6aXZr","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"17Pzd":[function(require,module,exports) {
 var define;

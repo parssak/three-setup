@@ -79,6 +79,7 @@ class CameraController {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
 class Scene {
   constructor() {
     // All Entities in Scene
@@ -136,7 +137,7 @@ export const scene = new Scene();
  *
  * @class Entity
  */
-export class Entity {
+export default class Entity {
   constructor(inGroup = false) {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");

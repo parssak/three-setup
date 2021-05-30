@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, Entity } from './setup'
+import Entity from './setup'
 
 const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
 
@@ -9,7 +9,7 @@ class Agent extends Entity {
         this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
         this.acceleration = new THREE.Vector3();
         this.wonderTheta = 0;
-        this.maxSpeed = 10;
+        this.maxSpeed = 1;
         this.boost = new THREE.Vector3();
     }
 
@@ -57,7 +57,7 @@ class Agent extends Entity {
     }
 
     BuildMesh() {
-        this.geometry = new THREE.CylinderGeometry(0, 2, 4, 5);
+        this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
         this.geometry.rotateX(THREE.Math.degToRad(90))
         this.material = new THREE.MeshNormalMaterial();
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -114,7 +114,7 @@ class Boid extends Entity {
             agent.ApplyForce(this.Align(agent));
             agent.ApplyForce(this.Separate(agent));
             agent.ApplyForce(this.Cohesion(agent));
-            agent.ApplyForce(this.AvoidBoxContainer(agent, 160, 160, 160));
+            agent.ApplyForce(this.AvoidBoxContainer(agent, 300, 300, 300));
             agent.Update();
         });
         super.Update();
@@ -250,12 +250,10 @@ class Boid extends Entity {
 
 }
 
-let resetDescription = null;
 window.addEventListener('mousedown', () => {
     document.getElementById('description').className = "dimmed"
-    if (resetDescription !== null) clearTimeout(resetDescription);
-    resetDescription = setTimeout(() => { document.getElementById('description').className = ""}, 2000)
 })
+window.addEventListener('mouseup', () => document.getElementById('description').className = "")
 
 new Boid();
 
