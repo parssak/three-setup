@@ -442,7 +442,6 @@ id) /*: string*/
 }
 
 },{}],"5XPnV":[function(require,module,exports) {
-var _three = require('three');
 var _setup = require('./setup');
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 var _setupDefault = _parcelHelpers.interopDefault(_setup);
@@ -450,17 +449,17 @@ const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 -
 class Agent extends _setupDefault.default {
   constructor() {
     super(true);
-    this.velocity = new _three.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
-    this.acceleration = new _three.Vector3();
+    this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
+    this.acceleration = new THREE.Vector3();
     this.wonderTheta = 0;
     this.maxSpeed = 1;
-    this.boost = new _three.Vector3();
+    this.boost = new THREE.Vector3();
   }
   Start() {
     super.Start();
     const radius = getRandomNum(0, 100);
-    const theta = _three.Math.degToRad(getRandomNum(180));
-    const phi = _three.Math.degToRad(getRandomNum(360));
+    const theta = THREE.Math.degToRad(getRandomNum(180));
+    const phi = THREE.Math.degToRad(getRandomNum(360));
     this.mesh.position.x = Math.sin(theta) * Math.cos(phi) * radius;
     this.mesh.position.y = Math.sin(theta) * Math.sin(phi) * radius;
     this.mesh.position.z = Math.cos(theta) * radius;
@@ -471,7 +470,7 @@ class Agent extends _setupDefault.default {
     this.ApplyForce(this.boost);
     this.boost.multiplyScalar(0.9);
     if (this.boost.length() < 0.01) {
-      this.boost = new _three.Vector3();
+      this.boost = new THREE.Vector3();
     }
     // update velocity
     this.velocity.add(this.acceleration);
@@ -491,10 +490,10 @@ class Agent extends _setupDefault.default {
     super.Update(time);
   }
   BuildMesh() {
-    this.geometry = new _three.CylinderGeometry(0, 4, 8, 10);
-    this.geometry.rotateX(_three.Math.degToRad(90));
-    this.material = new _three.MeshNormalMaterial();
-    this.mesh = new _three.Mesh(this.geometry, this.material);
+    this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
+    this.geometry.rotateX(THREE.Math.degToRad(90));
+    this.material = new THREE.MeshNormalMaterial();
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
   }
   ApplyForce(f) {
     this.acceleration.add(f.clone());
@@ -525,7 +524,7 @@ class Boid extends _setupDefault.default {
     super.Start();
   }
   BuildMesh() {
-    this.group = new _three.Group();
+    this.group = new THREE.Group();
     this.count = 50;
     this.agents = [];
     for (let i = 0; i < this.count; i++) {
@@ -545,13 +544,13 @@ class Boid extends _setupDefault.default {
     super.Update();
   }
   Align(currAgent) {
-    const sumVec = new _three.Vector3();
+    const sumVec = new THREE.Vector3();
     let count = 0;
     const maxSpeed = this.params.maxSpeed;
     ;
     const maxForce = this.params.align.maxForce;
     const effectiveRange = this.params.align.effectiveRange;
-    const steer = new _three.Vector3();
+    const steer = new THREE.Vector3();
     this.agents.forEach(otherAgent => {
       const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
       if (dist > 0 && dist < effectiveRange) {
@@ -571,16 +570,16 @@ class Boid extends _setupDefault.default {
     return steer;
   }
   Separate(currAgent) {
-    const sumVec = new _three.Vector3();
+    const sumVec = new THREE.Vector3();
     let count = 0;
     const maxSpeed = this.params.maxSpeed;
     const maxForce = this.params.separate.maxForce;
     const effectiveRange = this.params.separate.effectiveRange;
-    const steer = new _three.Vector3();
+    const steer = new THREE.Vector3();
     this.agents.forEach(otherAgent => {
       const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
       if (dist > 0 && dist < effectiveRange) {
-        let closeVec = new _three.Vector3();
+        let closeVec = new THREE.Vector3();
         closeVec.subVectors(currAgent.mesh.position, otherAgent.mesh.position);
         closeVec.normalize();
         closeVec.divideScalar(dist);
@@ -599,16 +598,16 @@ class Boid extends _setupDefault.default {
     }
     return steer;
   }
-  Seek(currAgent, target = new _three.Vector3()) {
+  Seek(currAgent, target = new THREE.Vector3()) {
     const maxSpeed = this.params.maxSpeed;
     ;
     const maxForce = this.params.seek.maxForce;
-    const toGoalVector = new _three.Vector3();
+    const toGoalVector = new THREE.Vector3();
     toGoalVector.subVectors(target, currAgent.mesh.position);
     const distance = toGoalVector.length();
     toGoalVector.normalize();
     toGoalVector.multiplyScalar(maxSpeed);
-    const steerVector = new _three.Vector3();
+    const steerVector = new THREE.Vector3();
     steerVector.subVectors(toGoalVector, currAgent.velocity);
     // limit force
     if (steerVector.length() > maxForce) {
@@ -617,10 +616,10 @@ class Boid extends _setupDefault.default {
     return steerVector;
   }
   Cohesion(currAgent) {
-    const sumVector = new _three.Vector3();
+    const sumVector = new THREE.Vector3();
     let count = 0;
     const effectiveRange = this.params.choesin.effectiveRange;
-    const steerVector = new _three.Vector3();
+    const steerVector = new THREE.Vector3();
     this.agents.forEach(otherAgent => {
       const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
       if (dist > 0 && dist < effectiveRange) {
@@ -634,10 +633,10 @@ class Boid extends _setupDefault.default {
     }
     return steerVector;
   }
-  Avoid(currentCreature, wall = new _three.Vector3()) {
+  Avoid(currentCreature, wall = new THREE.Vector3()) {
     currentCreature.mesh.geometry.computeBoundingSphere();
     const boundingSphere = currentCreature.mesh.geometry.boundingSphere;
-    const toMeVector = new _three.Vector3();
+    const toMeVector = new THREE.Vector3();
     toMeVector.subVectors(currentCreature.mesh.position, wall);
     const distance = toMeVector.length() - boundingSphere.radius * 2;
     const steerVector = toMeVector.clone();
@@ -646,13 +645,13 @@ class Boid extends _setupDefault.default {
     return steerVector;
   }
   AvoidBoxContainer(currentCreature, rangeWidth = 80, rangeHeight = 80, rangeDepth = 80) {
-    const sumVector = new _three.Vector3();
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
-    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
+    const sumVector = new THREE.Vector3();
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
+    sumVector.add(this.Avoid(currentCreature, new THREE.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
     sumVector.multiplyScalar(Math.pow(currentCreature.velocity.length(), 3));
     return sumVector;
   }
@@ -663,81 +662,89 @@ window.addEventListener('mousedown', () => {
 window.addEventListener('mouseup', () => document.getElementById('description').className = "");
 new Boid();
 
-},{"./setup":"5Pmov","three":"17Pzd","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"5Pmov":[function(require,module,exports) {
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./setup":"3tMD4"}],"5gA8y":[function(require,module,exports) {
+"use strict";
+
+exports.interopDefault = function (a) {
+  return a && a.__esModule ? a : {
+    default: a
+  };
+};
+
+exports.defineInteropFlag = function (a) {
+  Object.defineProperty(a, '__esModule', {
+    value: true
+  });
+};
+
+exports.exportAll = function (source, dest) {
+  Object.keys(source).forEach(function (key) {
+    if (key === 'default' || key === '__esModule') {
+      return;
+    } // Skip duplicate re-exports when they have the same value.
+
+
+    if (key in dest && dest[key] === source[key]) {
+      return;
+    }
+
+    Object.defineProperty(dest, key, {
+      enumerable: true,
+      get: function () {
+        return source[key];
+      }
+    });
+  });
+  return dest;
+};
+
+exports.export = function (dest, destName, get) {
+  Object.defineProperty(dest, destName, {
+    enumerable: true,
+    get: get
+  });
+};
+},{}],"3tMD4":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 _parcelHelpers.export(exports, "scene", function () {
   return scene;
 });
-var _three = require('three');
-var _threeOrbitControls = require('three-orbit-controls');
-var _threeOrbitControlsDefault = _parcelHelpers.interopDefault(_threeOrbitControls);
+var _Scene = require('./Scene');
+var _SceneDefault = _parcelHelpers.interopDefault(_Scene);
 var _uuid = require('uuid');
-const OrbitControls = _threeOrbitControlsDefault.default(_three);
-/**
-* -  THREE-SETUP -
-*
-* An Object-Oriented setup for three.js
-*
-* By Parssa Kyanzadeh
-* www.parssak.com
-*/
-class CameraController {
-  constructor(scene) {
+const scene = new _SceneDefault.default();
+class Entity {
+  constructor(inGroup = false) {
+    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
+    this.id = _uuid.v4();
     this.scene = scene;
-    // Renderer
-    this.AddRenderer();
-    // Set up Camera
-    this.AddCamera();
-    // Set up Controls
-    this.AddControls();
-    // Recalibrates on resize
-    window.addEventListener('resize', () => this.HandleResize());
+    this.inGroup = inGroup;
+    this.Start();
   }
-  /** Initializes Renderer and appends
-  *  it to the #container element.
-  */
-  AddRenderer() {
-    this.renderer = new _three.WebGLRenderer({
-      antialias: true
-    });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.container = document.getElementById('container');
-    this.container.appendChild(this.renderer.domElement);
+  /*Use this to define the mesh of the Entity*/
+  BuildMesh() {
+    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
   }
-  /** Initializes Camera*/
-  AddCamera() {
-    this.fov = 45;
-    this.near = 0.01;
-    this.far = 20000;
-    this.camera = new _three.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, this.near, this.far);
+  /*Called once on initialization*/
+  Start() {
+    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
+    this.BuildMesh();
+    this.scene.Add(this);
   }
-  /** Initializes Controls*/
-  AddControls() {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.autoRotate = false;
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.39;
-    this.camera.position.z = 200;
-    this.controls.update();
-  }
-  /** Handles recalibrating the camera when
-  *  the window is resized.
-  */
-  HandleResize() {
-    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-  }
-  /** Updates the controls, and re-renders everything.
-  *  Note: This is called by the Scene update loop externally.
-  */
-  Update() {
-    this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+  /*Called every frame*/
+  Update(time) {
+    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
   }
 }
+exports.default = Entity;
+
+},{"./Scene":"22zJk","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"22zJk":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+var _three = require('three');
+var _CameraController = require('./CameraController');
+var _CameraControllerDefault = _parcelHelpers.interopDefault(_CameraController);
 class Scene {
   constructor() {
     // All Entities in Scene
@@ -745,7 +752,7 @@ class Scene {
     // Scene
     this.scene = new _three.Scene();
     // Camera Controller
-    this.cameraController = new CameraController(this.scene);
+    this.cameraController = new _CameraControllerDefault.default(this.scene);
     this.Setup();
     // Run the Update loop
     this.cameraController.renderer.setAnimationLoop(time => this.Update(time));
@@ -779,30 +786,9 @@ class Scene {
     this.cameraController.Update();
   }
 }
-const scene = new Scene();
-class Entity {
-  constructor(inGroup = false) {
-    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
-    this.id = _uuid.v4();
-    this.scene = scene;
-    this.inGroup = inGroup;
-    this.Start();
-  }
-  /*Use this to define the mesh of the Entity*/
-  BuildMesh() {
-    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
-  }
-  /*Called once on initialization*/
-  Start() {
-    this.BuildMesh();
-    this.scene.Add(this);
-  }
-  /*Called every frame*/
-  Update(time) {}
-}
-exports.default = Entity;
+exports.default = Scene;
 
-},{"three":"17Pzd","three-orbit-controls":"6aXZr","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"17Pzd":[function(require,module,exports) {
+},{"three":"17Pzd","./CameraController":"5SKJw","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"17Pzd":[function(require,module,exports) {
 var define;
 /**
 * @license
@@ -30619,7 +30605,72 @@ var define;
   });
 });
 
-},{}],"6aXZr":[function(require,module,exports) {
+},{}],"5SKJw":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+var _three = require('three');
+var _threeOrbitControls = require('three-orbit-controls');
+var _threeOrbitControlsDefault = _parcelHelpers.interopDefault(_threeOrbitControls);
+const OrbitControls = _threeOrbitControlsDefault.default(_three);
+class CameraController {
+  constructor(scene) {
+    this.scene = scene;
+    // Renderer
+    this.AddRenderer();
+    // Set up Camera
+    this.AddCamera();
+    // Set up Controls
+    this.AddControls();
+    // Recalibrates on resize
+    window.addEventListener('resize', () => this.HandleResize());
+  }
+  /** Initializes Renderer and appends
+  *  it to the #container element.
+  */
+  AddRenderer() {
+    this.renderer = new _three.WebGLRenderer({
+      antialias: true
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.container = document.getElementById('container');
+    this.container.appendChild(this.renderer.domElement);
+  }
+  /** Initializes Camera*/
+  AddCamera() {
+    this.fov = 45;
+    this.near = 0.01;
+    this.far = 20000;
+    this.camera = new _three.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, this.near, this.far);
+  }
+  /** Initializes Controls*/
+  AddControls() {
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.autoRotate = false;
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.39;
+    this.camera.position.z = 200;
+    this.controls.update();
+  }
+  /** Handles recalibrating the camera when
+  *  the window is resized.
+  */
+  HandleResize() {
+    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+  }
+  /** Updates the controls, and re-renders everything.
+  *  Note: This is called by the Scene update loop externally.
+  */
+  Update() {
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+exports.default = CameraController;
+
+},{"three":"17Pzd","three-orbit-controls":"6aXZr","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"6aXZr":[function(require,module,exports) {
 module.exports = function( THREE ) {
 	/**
 	 * @author qiao / https://github.com/qiao
@@ -31857,48 +31908,6 @@ function v4(options, buf, offset) {
 
 module.exports = v4;
 
-},{"./lib/rng":"3iwbt","./lib/bytesToUuid":"5sgUX"}],"5gA8y":[function(require,module,exports) {
-"use strict";
-
-exports.interopDefault = function (a) {
-  return a && a.__esModule ? a : {
-    default: a
-  };
-};
-
-exports.defineInteropFlag = function (a) {
-  Object.defineProperty(a, '__esModule', {
-    value: true
-  });
-};
-
-exports.exportAll = function (source, dest) {
-  Object.keys(source).forEach(function (key) {
-    if (key === 'default' || key === '__esModule') {
-      return;
-    } // Skip duplicate re-exports when they have the same value.
-
-
-    if (key in dest && dest[key] === source[key]) {
-      return;
-    }
-
-    Object.defineProperty(dest, key, {
-      enumerable: true,
-      get: function () {
-        return source[key];
-      }
-    });
-  });
-  return dest;
-};
-
-exports.export = function (dest, destName, get) {
-  Object.defineProperty(dest, destName, {
-    enumerable: true,
-    get: get
-  });
-};
-},{}]},["2FQzm","5XPnV"], "5XPnV", "parcelRequire2b3b")
+},{"./lib/rng":"3iwbt","./lib/bytesToUuid":"5sgUX"}]},["2FQzm","5XPnV"], "5XPnV", "parcelRequire2b3b")
 
 //# sourceMappingURL=index.72166a09.js.map

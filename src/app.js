@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import Entity from './setup'
 
 const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
