@@ -4,7 +4,7 @@ const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 -
 
 class Agent extends Entity {
     constructor() {
-        super(true);
+        super({inGroup: true});
         this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
         this.acceleration = new THREE.Vector3();
         this.wonderTheta = 0;
@@ -249,10 +249,12 @@ class Boid extends Entity {
 
 }
 
+new Boid();
+
 window.addEventListener('mousedown', () => {
     document.getElementById('description').className = "dimmed"
 })
 window.addEventListener('mouseup', () => document.getElementById('description').className = "")
 
-new Boid();
+
 

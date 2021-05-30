@@ -11,9 +11,24 @@ This class handles all logic/setup for the Camera and Controls. To modify the Ca
 ## Scene
 This class is represents the entire scene/world. It handles setting up the renderer, resizing, and exposes a public function for adding a mesh to the scene. 
 
+### SetupScene()
+Include any initialization of the Scene in here, such as lighting, meshes, fog, etc..
+
 ## Entity
 This abstract class is to be used as the superclass to all objects in your scene. 
+`_id`: A unique identifier initialized when the Entity is created.
+`_scene`: A reference to the Scene singleton, useful for accessing other Entities in the scene by doing `this.scene.entities`
+`name?:` A non-unique value that can be given to an Entity.
+`inGroup?:` A boolean value for determine if an Entity is in a THREE.Group. Prevents double-rendering of both the Entity and it's parent group.
 
+### Start()
+Include any initialization logic. Note: The Entity is added to the Scene automatically, so do not include any logic for that in Start.
+
+### Update()
+Include any logic for updating the Entity.
+
+### BuildMesh()
+Include any setup for the Entity's mesh
 ### Usage
 
 First run `npm i` to download the required dependencies. 

@@ -448,7 +448,9 @@ var _setupDefault = _parcelHelpers.interopDefault(_setup);
 const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
 class Agent extends _setupDefault.default {
   constructor() {
-    super(true);
+    super({
+      inGroup: true
+    });
     this.velocity = new THREE.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
     this.acceleration = new THREE.Vector3();
     this.wonderTheta = 0;
@@ -656,11 +658,11 @@ class Boid extends _setupDefault.default {
     return sumVector;
   }
 }
+new Boid();
 window.addEventListener('mousedown', () => {
   document.getElementById('description').className = "dimmed";
 });
 window.addEventListener('mouseup', () => document.getElementById('description').className = "");
-new Boid();
 
 },{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./setup":"3tMD4"}],"5gA8y":[function(require,module,exports) {
 "use strict";
@@ -715,11 +717,15 @@ var _SceneDefault = _parcelHelpers.interopDefault(_Scene);
 var _uuid = require('uuid');
 const scene = new _SceneDefault.default();
 class Entity {
-  constructor(inGroup = false) {
+  constructor(options = {
+    name: '',
+    inGroup: false
+  }) {
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
-    this.id = _uuid.v4();
-    this.scene = scene;
-    this.inGroup = inGroup;
+    this._id = _uuid.v4();
+    this._scene = scene;
+    this.name = options.name || '';
+    this.inGroup = options.inGroup || false;
     this.Start();
   }
   /*Use this to define the mesh of the Entity*/
@@ -730,7 +736,7 @@ class Entity {
   Start() {
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
     this.BuildMesh();
-    this.scene.Add(this);
+    this._scene.Add(this);
   }
   /*Called every frame*/
   Update(time) {
@@ -753,12 +759,12 @@ class Scene {
     this.scene = new _three.Scene();
     // Camera Controller
     this.cameraController = new _CameraControllerDefault.default(this.scene);
-    this.Setup();
+    this.SetupScene();
     // Run the Update loop
     this.cameraController.renderer.setAnimationLoop(time => this.Update(time));
   }
   /** Include any Scene setup logic here*/
-  Setup() {
+  SetupScene() {
     const ambientLight = new _three.AmbientLight(0x041f60);
     ambientLight.intensity = 0.3;
     this.scene.add(ambientLight);
@@ -788,7 +794,7 @@ class Scene {
 }
 exports.default = Scene;
 
-},{"three":"17Pzd","./CameraController":"5SKJw","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"17Pzd":[function(require,module,exports) {
+},{"three":"17Pzd","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./CameraController":"5SKJw"}],"17Pzd":[function(require,module,exports) {
 var define;
 /**
 * @license

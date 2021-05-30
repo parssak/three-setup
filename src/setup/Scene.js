@@ -12,14 +12,14 @@ export default class Scene {
     // Camera Controller
     this.cameraController = new CameraController(this.scene);
 
-    this.Setup()
+    this.SetupScene()
 
     // Run the Update loop
     this.cameraController.renderer.setAnimationLoop(time => this.Update(time))
   }
 
   /** Include any Scene setup logic here */
-  Setup() {
+  SetupScene() {
     const ambientLight = new THREE.AmbientLight(0x041f60);
     ambientLight.intensity = 0.3;
     this.scene.add(ambientLight);

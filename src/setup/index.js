@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
  * www.parssak.com
  */
 
+// All Entities use the same scene singleton
 export const scene = new Scene();
 
 /**
@@ -18,13 +19,14 @@ export const scene = new Scene();
  * @class Entity
  */
 export default class Entity {
-  constructor(inGroup = false) {
+  constructor(options = {name: '', inGroup: false}) {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
 
-    this.id = uuidv4();
-    this.scene = scene;
-    this.inGroup = inGroup;
+    this._id = uuidv4();
+    this._scene = scene;
+    this.name = options.name || '';
+    this.inGroup = options.inGroup || false;
 
     this.Start()
   }
@@ -41,7 +43,7 @@ export default class Entity {
       throw new Error("Abstract classes can't be instantiated.");
     
     this.BuildMesh()
-    this.scene.Add(this)
+    this._scene.Add(this)
   }
 
   // Called every frame
