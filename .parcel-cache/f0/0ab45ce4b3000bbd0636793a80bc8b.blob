@@ -1,0 +1,222 @@
+var _three = require('three');
+var _setup = require('./setup');
+const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
+class Agent extends _setup.Entity {
+  constructor() {
+    super(true);
+    this.velocity = new _three.Vector3(getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1, getRandomNum(100, -100) * 0.1);
+    this.acceleration = new _three.Vector3();
+    this.wonderTheta = 0;
+    this.maxSpeed = 10;
+    this.boost = new _three.Vector3();
+  }
+  Start() {
+    super.Start();
+    const radius = getRandomNum(0, 100);
+    const theta = _three.Math.degToRad(getRandomNum(180));
+    const phi = _three.Math.degToRad(getRandomNum(360));
+    this.mesh.position.x = Math.sin(theta) * Math.cos(phi) * radius;
+    this.mesh.position.y = Math.sin(theta) * Math.sin(phi) * radius;
+    this.mesh.position.z = Math.cos(theta) * radius;
+  }
+  Update(time) {
+    const maxSpeed = this.maxSpeed;
+    // boost
+    this.ApplyForce(this.boost);
+    this.boost.multiplyScalar(0.9);
+    if (this.boost.length() < 0.01) {
+      this.boost = new _three.Vector3();
+    }
+    // update velocity
+    this.velocity.add(this.acceleration);
+    // limit velocity
+    if (this.velocity.length() > maxSpeed) {
+      this.velocity.clampLength(0, maxSpeed);
+    }
+    // update position
+    this.mesh.position.add(this.velocity);
+    // reset acc
+    this.acceleration.multiplyScalar(0);
+    // head
+    const head = this.velocity.clone();
+    head.multiplyScalar(10);
+    head.add(this.mesh.position);
+    this.mesh.lookAt(head);
+    super.Update(time);
+  }
+  BuildMesh() {
+    this.geometry = new _three.CylinderGeometry(0, 2, 4, 5);
+    this.geometry.rotateX(_three.Math.degToRad(90));
+    this.material = new _three.MeshNormalMaterial();
+    this.mesh = new _three.Mesh(this.geometry, this.material);
+  }
+  ApplyForce(f) {
+    this.acceleration.add(f.clone());
+  }
+}
+class Boid extends _setup.Entity {
+  constructor(count) {
+    super();
+    this.params = {
+      maxSpeed: 7,
+      seek: {
+        maxForce: 0.04
+      },
+      align: {
+        effectiveRange: 85,
+        maxForce: 0.16
+      },
+      separate: {
+        effectiveRange: 70,
+        maxForce: 0.2
+      },
+      choesin: {
+        effectiveRange: 200
+      }
+    };
+  }
+  Start() {
+    super.Start();
+  }
+  BuildMesh() {
+    this.group = new _three.Group();
+    this.count = 50;
+    this.agents = [];
+    for (let i = 0; i < this.count; i++) {
+      const agent = new Agent();
+      this.group.add(agent.mesh);
+      this.agents.push(agent);
+    }
+  }
+  Update() {
+    this.agents.forEach(agent => {
+      agent.ApplyForce(this.Align(agent));
+      agent.ApplyForce(this.Separate(agent));
+      agent.ApplyForce(this.Cohesion(agent));
+      agent.ApplyForce(this.AvoidBoxContainer(agent, 140, 140, 140));
+      agent.Update();
+    });
+    super.Update();
+  }
+  Align(currAgent) {
+    const sumVec = new _three.Vector3();
+    let count = 0;
+    const maxSpeed = this.params.maxSpeed;
+    ;
+    const maxForce = this.params.align.maxForce;
+    const effectiveRange = this.params.align.effectiveRange;
+    const steer = new _three.Vector3();
+    this.agents.forEach(otherAgent => {
+      const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+      if (dist > 0 && dist < effectiveRange) {
+        sumVec.add(otherAgent.velocity);
+        count++;
+      }
+    });
+    if (count > 0) {
+      sumVec.divideScalar(count);
+      sumVec.normalize();
+      sumVec.multiplyScalar(maxSpeed);
+      steer.subVectors(sumVec, currAgent.velocity);
+      if (steer.length() > maxForce) {
+        steer.clampLength(0, maxForce);
+      }
+    }
+    return steer;
+  }
+  Separate(currAgent) {
+    const sumVec = new _three.Vector3();
+    let count = 0;
+    const maxSpeed = this.params.maxSpeed;
+    const maxForce = this.params.separate.maxForce;
+    const effectiveRange = this.params.separate.effectiveRange;
+    const steer = new _three.Vector3();
+    this.agents.forEach(otherAgent => {
+      const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+      if (dist > 0 && dist < effectiveRange) {
+        let closeVec = new _three.Vector3();
+        closeVec.subVectors(currAgent.mesh.position, otherAgent.mesh.position);
+        closeVec.normalize();
+        closeVec.divideScalar(dist);
+        sumVec.add(closeVec);
+        count++;
+      }
+    });
+    if (count > 0) {
+      sumVec.divideScalar(count);
+      sumVec.normalize();
+      sumVec.multiplyScalar(maxSpeed);
+      steer.subVectors(sumVec, currAgent.velocity);
+      if (steer.length() > maxForce) {
+        steer.clampLength(0, maxForce);
+      }
+    }
+    return steer;
+  }
+  Seek(currAgent, target = new _three.Vector3()) {
+    const maxSpeed = this.params.maxSpeed;
+    ;
+    const maxForce = this.params.seek.maxForce;
+    const toGoalVector = new _three.Vector3();
+    toGoalVector.subVectors(target, currAgent.mesh.position);
+    const distance = toGoalVector.length();
+    toGoalVector.normalize();
+    toGoalVector.multiplyScalar(maxSpeed);
+    const steerVector = new _three.Vector3();
+    steerVector.subVectors(toGoalVector, currAgent.velocity);
+    // limit force
+    if (steerVector.length() > maxForce) {
+      steerVector.clampLength(0, maxForce);
+    }
+    return steerVector;
+  }
+  Cohesion(currAgent) {
+    const sumVector = new _three.Vector3();
+    let count = 0;
+    const effectiveRange = this.params.choesin.effectiveRange;
+    const steerVector = new _three.Vector3();
+    this.agents.forEach(otherAgent => {
+      const dist = currAgent.mesh.position.distanceTo(otherAgent.mesh.position);
+      if (dist > 0 && dist < effectiveRange) {
+        sumVector.add(otherAgent.mesh.position);
+        count++;
+      }
+    });
+    if (count > 0) {
+      sumVector.divideScalar(count);
+      steerVector.add(this.Seek(currAgent, sumVector));
+    }
+    return steerVector;
+  }
+  Avoid(currentCreature, wall = new _three.Vector3()) {
+    currentCreature.mesh.geometry.computeBoundingSphere();
+    const boundingSphere = currentCreature.mesh.geometry.boundingSphere;
+    const toMeVector = new _three.Vector3();
+    toMeVector.subVectors(currentCreature.mesh.position, wall);
+    const distance = toMeVector.length() - boundingSphere.radius * 2;
+    const steerVector = toMeVector.clone();
+    steerVector.normalize();
+    steerVector.multiplyScalar(1 / Math.pow(distance, 2));
+    return steerVector;
+  }
+  AvoidBoxContainer(currentCreature, rangeWidth = 80, rangeHeight = 80, rangeDepth = 80) {
+    const sumVector = new _three.Vector3();
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(-rangeWidth, currentCreature.mesh.position.y, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, rangeHeight, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, -rangeHeight, currentCreature.mesh.position.z)));
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, rangeDepth)));
+    sumVector.add(this.Avoid(currentCreature, new _three.Vector3(currentCreature.mesh.position.x, currentCreature.mesh.position.y, -rangeDepth)));
+    sumVector.multiplyScalar(Math.pow(currentCreature.velocity.length(), 3));
+    return sumVector;
+  }
+}
+let resetDescription = null;
+window.addEventListener('mousedown', () => {
+  document.getElementById('description').className = "dimmed";
+  if (resetDescription !== null) clearTimeout(resetDescription);
+  resetDescription = setTimeout(() => {
+    document.getElementById('description').className = "";
+  }, 2000);
+});
+new Boid();

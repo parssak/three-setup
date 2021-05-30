@@ -1,0 +1,24 @@
+{
+  "name": "three-setup-1",
+  "version": "1.0.0",
+  "description": "An Object-oriented setup for creating projects using three.js. This boilerplate aims to clean up the code structure of three.js projects, and give a similar feel as to how Unity projects are structured.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "prod": "parcel build src/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parssak/three-setup.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/parssak/three-setup/issues"
+  },
+  "homepage": "https://github.com/parssak/three-setup#readme",
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.2"
+  }
+}
