@@ -2,8 +2,7 @@
 
 An Object-oriented setup for creating projects using three.js. This boilerplate aims to clean up the code structure of three.js projects, and give a similar feel as to how Unity projects are structured.
 
-# setup.js
-`setup.js` contains three classes, `CameraController`, `Scene` & `Entity`. 
+# src/setup
 
 ## CameraController
 This class handles all logic/setup for the Camera and Controls. To modify the Camera in your scene, you can edit `AddCamera()`, and to modify the Controls in your scene, you can edit `AddControls()`. 
