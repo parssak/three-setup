@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "dev": "parcel src/index.html",
-    "prod": "parcel build src/index.html"
+    "prod": "parcel build src/index.html --public-url='./'."
   },
   "repository": {
     "type": "git",
