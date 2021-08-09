@@ -20,5 +20,9 @@
   "homepage": "https://github.com/parssak/three-setup#readme",
   "devDependencies": {
     "parcel": "^2.0.0-beta.2"
+  },
+  "dependencies": {
+    "three": "^0.131.3",
+    "three-orbit-controls": "^82.1.0"
   }
 }
