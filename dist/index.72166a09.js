@@ -445,63 +445,16 @@ id) /*: string*/
 var _entitiesAgent = require('./entities/Agent');
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 var _entitiesAgentDefault = _parcelHelpers.interopDefault(_entitiesAgent);
-new _entitiesAgentDefault.default({
-  x: 3,
-  y: 4,
-  z: 4
-});
+new _entitiesAgentDefault.default();
 
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./entities/Agent":"10XIx"}],"5gA8y":[function(require,module,exports) {
-"use strict";
-
-exports.interopDefault = function (a) {
-  return a && a.__esModule ? a : {
-    default: a
-  };
-};
-
-exports.defineInteropFlag = function (a) {
-  Object.defineProperty(a, '__esModule', {
-    value: true
-  });
-};
-
-exports.exportAll = function (source, dest) {
-  Object.keys(source).forEach(function (key) {
-    if (key === 'default' || key === '__esModule') {
-      return;
-    } // Skip duplicate re-exports when they have the same value.
-
-
-    if (key in dest && dest[key] === source[key]) {
-      return;
-    }
-
-    Object.defineProperty(dest, key, {
-      enumerable: true,
-      get: function () {
-        return source[key];
-      }
-    });
-  });
-  return dest;
-};
-
-exports.export = function (dest, destName, get) {
-  Object.defineProperty(dest, destName, {
-    enumerable: true,
-    get: get
-  });
-};
-},{}],"10XIx":[function(require,module,exports) {
+},{"./entities/Agent":"10XIx","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"10XIx":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _setup = require('../_setup');
 var _setupDefault = _parcelHelpers.interopDefault(_setup);
 class Agent extends _setupDefault.default {
-  constructor(position) {
+  constructor() {
     super();
-    this.position = new THREE.Vector3(position.x, position.y, position.z);
   }
   BuildMesh() {
     this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
@@ -512,7 +465,10 @@ class Agent extends _setupDefault.default {
   Start() {
     super.Start();
   }
-  Update(time) {}
+  Update(time) {
+    this.mesh.rotation.x += 0.03;
+    this.mesh.rotation.y += 0.03;
+  }
 }
 exports.default = Agent;
 
@@ -524,8 +480,11 @@ _parcelHelpers.export(exports, "scene", function () {
 });
 var _Scene = require('./Scene');
 var _SceneDefault = _parcelHelpers.interopDefault(_Scene);
+var _EventController = require('./EventController');
+var _EventControllerDefault = _parcelHelpers.interopDefault(_EventController);
 var _uuid = require('uuid');
 const scene = new _SceneDefault.default();
+new _EventControllerDefault.default(scene);
 class Entity {
   constructor(options = {
     inGroup: false
@@ -553,23 +512,20 @@ class Entity {
 }
 exports.default = Entity;
 
-},{"./Scene":"4wxNX","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"4wxNX":[function(require,module,exports) {
+},{"./Scene":"4wxNX","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./EventController":"2w9iv"}],"4wxNX":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _three = require('three');
 var _CameraController = require('./CameraController');
 var _CameraControllerDefault = _parcelHelpers.interopDefault(_CameraController);
 class Scene {
+  entities = [];
+  scene = new _three.Scene();
+  cameraController = new _CameraControllerDefault.default(this.scene);
+  running = false;
   constructor() {
-    // All Entities in Scene
-    this.entities = [];
-    // Scene
-    this.scene = new _three.Scene();
-    // Camera Controller
-    this.cameraController = new _CameraControllerDefault.default(this.scene);
     this.SetupScene();
-    // Run the Update loop
-    this.cameraController.renderer.setAnimationLoop(time => this.Update(time));
+    this.Run();
   }
   /** Include any Scene setup logic here*/
   SetupScene() {}
@@ -591,8 +547,19 @@ class Scene {
   * @param {float} time Time since the Scene began
   */
   Update(time) {
-    this.entities.forEach(entity => !entity.inGroup && entity.Update(time));
+    if (this.running) this.entities.forEach(entity => !entity.inGroup && entity.Update(time));
     this.cameraController.Update();
+  }
+  Run() {
+    if (!this.running) {
+      this.cameraController.renderer.setAnimationLoop(time => this.Update(time));
+      this.running = true;
+    }
+  }
+  Stop() {
+    if (this.running) {
+      this.running = false;
+    }
   }
 }
 exports.default = Scene;
@@ -31608,6 +31575,48 @@ module.exports = function( THREE ) {
 	return OrbitControls;
 };
 
+},{}],"5gA8y":[function(require,module,exports) {
+"use strict";
+
+exports.interopDefault = function (a) {
+  return a && a.__esModule ? a : {
+    default: a
+  };
+};
+
+exports.defineInteropFlag = function (a) {
+  Object.defineProperty(a, '__esModule', {
+    value: true
+  });
+};
+
+exports.exportAll = function (source, dest) {
+  Object.keys(source).forEach(function (key) {
+    if (key === 'default' || key === '__esModule') {
+      return;
+    } // Skip duplicate re-exports when they have the same value.
+
+
+    if (key in dest && dest[key] === source[key]) {
+      return;
+    }
+
+    Object.defineProperty(dest, key, {
+      enumerable: true,
+      get: function () {
+        return source[key];
+      }
+    });
+  });
+  return dest;
+};
+
+exports.export = function (dest, destName, get) {
+  Object.defineProperty(dest, destName, {
+    enumerable: true,
+    get: get
+  });
+};
 },{}],"55aGJ":[function(require,module,exports) {
 var v1 = require('./v1');
 var v4 = require('./v4');
@@ -31824,6 +31833,23 @@ function v4(options, buf, offset) {
 
 module.exports = v4;
 
-},{"./lib/rng":"3iwbt","./lib/bytesToUuid":"5sgUX"}]},["2FQzm","5XPnV"], "5XPnV", "parcelRequire2b3b")
+},{"./lib/rng":"3iwbt","./lib/bytesToUuid":"5sgUX"}],"2w9iv":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+class EventController {
+  constructor(scene) {
+    this.scene = scene;
+    this.SetupEvents();
+  }
+  SetupEvents() {
+    document.addEventListener('keydown', e => {
+      if (e.keyCode !== 32) return;
+      this.scene.running ? this.scene.Stop() : this.scene.Run();
+    });
+  }
+}
+exports.default = EventController;
+
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}]},["2FQzm","5XPnV"], "5XPnV", "parcelRequire2b3b")
 
 //# sourceMappingURL=index.72166a09.js.map

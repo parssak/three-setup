@@ -1,4 +1,5 @@
 import Scene from './Scene'
+import EventController from './EventController'
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -12,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // All Entities use the same scene singleton
 export const scene = new Scene();
+new EventController(scene);
 
 /**
  * Abstract Class Entity.

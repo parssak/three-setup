@@ -1,29 +1,18 @@
 import * as THREE from 'three';
 import CameraController from './CameraController'
-
 export default class Scene {
+  entities = [];
+  scene = new THREE.Scene();
+  cameraController = new CameraController(this.scene);
+  running = false;
+
   constructor() {
-    // All Entities in Scene
-    this.entities = [];
-
-    // Scene
-    this.scene = new THREE.Scene();
-
-    // Camera Controller
-    this.cameraController = new CameraController(this.scene);
-
     this.SetupScene()
-
-    // Run the Update loop
-    this.cameraController.renderer.setAnimationLoop(time => this.Update(time))
+    this.Run();
   }
 
   /** Include any Scene setup logic here */
   SetupScene() {
-    // const ambientLight = new THREE.AmbientLight(0x041f60);
-    // ambientLight.intensity = 0.3;
-    // this.scene.add(ambientLight);
-    // this.scene.fog = new THREE.Fog(0x041f60, 3000, 20000);
   }
 
   /**
@@ -46,7 +35,21 @@ export default class Scene {
    * @param {float} time Time since the Scene began
    */
   Update(time) {
-    this.entities.forEach(entity => !entity.inGroup && entity.Update(time));
+    if (this.running)
+      this.entities.forEach(entity => !entity.inGroup && entity.Update(time));
     this.cameraController.Update()
+  }
+
+  Run() {
+    if (!this.running) {
+      this.cameraController.renderer.setAnimationLoop(time => this.Update(time))
+      this.running = true;
+    }
+  }
+
+  Stop() {
+    if (this.running) {
+      this.running = false;
+    }
   }
 }

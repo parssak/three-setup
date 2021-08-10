@@ -1,9 +1,8 @@
 import Entity from '../_setup'
 
 export default class Agent extends Entity {
-  constructor(position) {
+  constructor() {
     super();
-    this.position = new THREE.Vector3(position.x, position.y, position.z);
   }
 
   BuildMesh() {
@@ -18,6 +17,7 @@ export default class Agent extends Entity {
   }
 
   Update(time) {
-    // this.mesh.rotation.x += 0.01;
+    this.mesh.rotation.x += 0.03;
+    this.mesh.rotation.y += 0.03;
   }
 }
