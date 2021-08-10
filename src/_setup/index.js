@@ -1,5 +1,6 @@
 import Scene from './Scene'
 import EventController from './EventController'
+import getParams from '../utils/getParams';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -15,20 +16,25 @@ import { v4 as uuidv4 } from 'uuid';
 export const scene = new Scene();
 new EventController(scene);
 
+
 /**
  * Abstract Class Entity.
  *
  * @class Entity
  */
 export default class Entity {
-  constructor(options = { inGroup: false }) {
+  constructor(params) {
+    const entityParams = getParams(params);
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
-
+    const { ENTITY_OPTIONS, ...rest } = entityParams;
     this._id = uuidv4();
     this._scene = scene;
-    this.inGroup = options.inGroup || false;
-
+    this.inGroup = ENTITY_OPTIONS.inGroup || false;
+    Object.entries(rest).forEach(([key, value]) => {
+      this[key] = value;
+    });
+    this.Awake();
     this.Start()
   }
 
@@ -38,13 +44,18 @@ export default class Entity {
       throw new Error("Abstract classes can't be instantiated.");
   }
 
+  Awake() {
+    if (this.constructor == Entity)
+      throw new Error("Abstract classes can't be instantiated.");
+    this.BuildMesh()
+    this._scene.Add(this)
+    console.log('added mesh to scene');
+  }
+
   // Called once on initialization
   Start() {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
-
-    this.BuildMesh()
-    this._scene.Add(this)
   }
 
   // Called every frame

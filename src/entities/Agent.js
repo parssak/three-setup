@@ -1,8 +1,15 @@
 import Entity from '../_setup'
 
+const defaultProps = {
+  transform: {
+    position: new THREE.Vector3(0, 0, 0),
+    rotation: new THREE.Vector3(0, 0, 0),
+    scale: new THREE.Vector3(1, 1, 1),
+  }
+}
 export default class Agent extends Entity {
-  constructor() {
-    super();
+  constructor(props) {
+    super({...defaultProps, ...props});
   }
 
   BuildMesh() {
@@ -14,9 +21,12 @@ export default class Agent extends Entity {
 
   Start() {
     super.Start();
+    this.mesh.position.setX(this.transform.position.x);
+    this.mesh.position.setY(this.transform.position.y);
+    this.mesh.position.setZ(this.transform.position.z);
   }
 
-  Update(time) {
+  Update() {
     this.mesh.rotation.x += 0.03;
     this.mesh.rotation.y += 0.03;
   }

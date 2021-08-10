@@ -445,16 +445,40 @@ id) /*: string*/
 var _entitiesAgent = require('./entities/Agent');
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 var _entitiesAgentDefault = _parcelHelpers.interopDefault(_entitiesAgent);
-new _entitiesAgentDefault.default();
+new _entitiesAgentDefault.default({
+  transform: {
+    position: new THREE.Vector3(10, 10, 0)
+  }
+});
+new _entitiesAgentDefault.default({
+  transform: {
+    position: new THREE.Vector3(20, 10, 0)
+  }
+});
+new _entitiesAgentDefault.default({
+  transform: {
+    position: new THREE.Vector3(0, 10, 0)
+  }
+});
 
 },{"./entities/Agent":"10XIx","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"10XIx":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _setup = require('../_setup');
 var _setupDefault = _parcelHelpers.interopDefault(_setup);
+const defaultProps = {
+  transform: {
+    position: new THREE.Vector3(0, 0, 0),
+    rotation: new THREE.Vector3(0, 0, 0),
+    scale: new THREE.Vector3(1, 1, 1)
+  }
+};
 class Agent extends _setupDefault.default {
-  constructor() {
-    super();
+  constructor(props) {
+    super({
+      ...defaultProps,
+      ...props
+    });
   }
   BuildMesh() {
     this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
@@ -464,8 +488,11 @@ class Agent extends _setupDefault.default {
   }
   Start() {
     super.Start();
+    this.mesh.position.setX(this.transform.position.x);
+    this.mesh.position.setY(this.transform.position.y);
+    this.mesh.position.setZ(this.transform.position.z);
   }
-  Update(time) {
+  Update() {
     this.mesh.rotation.x += 0.03;
     this.mesh.rotation.y += 0.03;
   }
@@ -482,28 +509,38 @@ var _Scene = require('./Scene');
 var _SceneDefault = _parcelHelpers.interopDefault(_Scene);
 var _EventController = require('./EventController');
 var _EventControllerDefault = _parcelHelpers.interopDefault(_EventController);
+var _utilsGetParams = require('../utils/getParams');
+var _utilsGetParamsDefault = _parcelHelpers.interopDefault(_utilsGetParams);
 var _uuid = require('uuid');
 const scene = new _SceneDefault.default();
 new _EventControllerDefault.default(scene);
 class Entity {
-  constructor(options = {
-    inGroup: false
-  }) {
+  constructor(params) {
+    const entityParams = _utilsGetParamsDefault.default(params);
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
+    const {ENTITY_OPTIONS, ...rest} = entityParams;
     this._id = _uuid.v4();
     this._scene = scene;
-    this.inGroup = options.inGroup || false;
+    this.inGroup = ENTITY_OPTIONS.inGroup || false;
+    Object.entries(rest).forEach(([key, value]) => {
+      this[key] = value;
+    });
+    this.Awake();
     this.Start();
   }
   /*Use this to define the mesh of the Entity*/
   BuildMesh() {
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
   }
-  /*Called once on initialization*/
-  Start() {
+  Awake() {
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
     this.BuildMesh();
     this._scene.Add(this);
+    console.log('added mesh to scene');
+  }
+  /*Called once on initialization*/
+  Start() {
+    if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
   }
   /*Called every frame*/
   Update(time) {
@@ -512,7 +549,7 @@ class Entity {
 }
 exports.default = Entity;
 
-},{"./Scene":"4wxNX","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./EventController":"2w9iv"}],"4wxNX":[function(require,module,exports) {
+},{"./Scene":"4wxNX","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./EventController":"2w9iv","../utils/getParams":"EAp96"}],"4wxNX":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _three = require('three');
@@ -31849,6 +31886,22 @@ class EventController {
   }
 }
 exports.default = EventController;
+
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"EAp96":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+const DEFAULT_ENTITY_OPTIONS = {
+  inGroup: false
+};
+exports.default = params => {
+  return {
+    ENTITY_OPTIONS: {
+      ...params?.ENTITY_OPTIONS ?? ({}),
+      ...DEFAULT_ENTITY_OPTIONS
+    },
+    ...params
+  };
+};
 
 },{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}]},["2FQzm","5XPnV"], "5XPnV", "parcelRequire2b3b")
 
