@@ -1,0 +1,40 @@
+h1 {
+  font-size: 3rem;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: rgb(209, 209, 209);
+}
+
+p,ul {
+  font-size: 1rem;
+  max-width: 40ch;
+  line-height: 1.7;
+}
+p {
+  margin-top: 5rem;
+}
+
+ul {
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+li {
+  margin-bottom: 0.8rem;
+}
+li {
+  list-style: none;
+}
+li > *:not(:first-child) {
+  font-weight: 300;
+}
+
+#description {
+  transition: all 0.5s ease;
+}
+.dimmed {
+  opacity: 0.5;
+}
