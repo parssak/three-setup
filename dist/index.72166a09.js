@@ -442,33 +442,81 @@ id) /*: string*/
 }
 
 },{}],"5XPnV":[function(require,module,exports) {
-var _setup = require('./setup');
+var _entitiesAgent = require('./entities/Agent');
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+var _entitiesAgentDefault = _parcelHelpers.interopDefault(_entitiesAgent);
+new _entitiesAgentDefault.default({
+  x: 3,
+  y: 4,
+  z: 4
+});
+
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y","./entities/Agent":"10XIx"}],"5gA8y":[function(require,module,exports) {
+"use strict";
+
+exports.interopDefault = function (a) {
+  return a && a.__esModule ? a : {
+    default: a
+  };
+};
+
+exports.defineInteropFlag = function (a) {
+  Object.defineProperty(a, '__esModule', {
+    value: true
+  });
+};
+
+exports.exportAll = function (source, dest) {
+  Object.keys(source).forEach(function (key) {
+    if (key === 'default' || key === '__esModule') {
+      return;
+    } // Skip duplicate re-exports when they have the same value.
+
+
+    if (key in dest && dest[key] === source[key]) {
+      return;
+    }
+
+    Object.defineProperty(dest, key, {
+      enumerable: true,
+      get: function () {
+        return source[key];
+      }
+    });
+  });
+  return dest;
+};
+
+exports.export = function (dest, destName, get) {
+  Object.defineProperty(dest, destName, {
+    enumerable: true,
+    get: get
+  });
+};
+},{}],"10XIx":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+var _setup = require('../_setup');
 var _setupDefault = _parcelHelpers.interopDefault(_setup);
 class Agent extends _setupDefault.default {
-  constructor() {
-    super({
-      inGroup: true
-    });
+  constructor(position) {
+    super();
+    this.position = new THREE.Vector3(position.x, position.y, position.z);
   }
-  Start() {
-    super.Start();
-  }
-  Update(time) {}
   BuildMesh() {
     this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
     this.geometry.rotateX(THREE.Math.degToRad(90));
     this.material = new THREE.MeshNormalMaterial();
     this.mesh = new THREE.Mesh(this.geometry, this.material);
   }
+  Start() {
+    super.Start();
+  }
+  Update(time) {}
 }
-new Agent();
-window.addEventListener('mousedown', () => {
-  document.getElementById('description').className = "dimmed";
-});
-window.addEventListener('mouseup', () => document.getElementById('description').className = "");
+exports.default = Agent;
 
-},{"./setup":"3tMD4","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"3tMD4":[function(require,module,exports) {
+},{"../_setup":"1mRU3","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"1mRU3":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 _parcelHelpers.export(exports, "scene", function () {
@@ -480,13 +528,11 @@ var _uuid = require('uuid');
 const scene = new _SceneDefault.default();
 class Entity {
   constructor(options = {
-    name: '',
     inGroup: false
   }) {
     if (this.constructor == Entity) throw new Error("Abstract classes can't be instantiated.");
     this._id = _uuid.v4();
     this._scene = scene;
-    this.name = options.name || '';
     this.inGroup = options.inGroup || false;
     this.Start();
   }
@@ -507,7 +553,7 @@ class Entity {
 }
 exports.default = Entity;
 
-},{"./Scene":"22zJk","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"22zJk":[function(require,module,exports) {
+},{"./Scene":"4wxNX","uuid":"55aGJ","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"4wxNX":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _three = require('three');
@@ -526,12 +572,7 @@ class Scene {
     this.cameraController.renderer.setAnimationLoop(time => this.Update(time));
   }
   /** Include any Scene setup logic here*/
-  SetupScene() {
-    const ambientLight = new _three.AmbientLight(0x041f60);
-    ambientLight.intensity = 0.3;
-    this.scene.add(ambientLight);
-    this.scene.fog = new _three.Fog(0x041f60, 3000, 20000);
-  }
+  SetupScene() {}
   /**
   * Adds a new mesh to the scene.
   * @param {THREE.Mesh} mesh New Mesh to add to scene
@@ -556,7 +597,7 @@ class Scene {
 }
 exports.default = Scene;
 
-},{"three":"1lq1c","./CameraController":"5SKJw","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"1lq1c":[function(require,module,exports) {
+},{"three":"1lq1c","./CameraController":"6cdvr","@parcel/transformer-js/lib/esmodule-helpers.js":"5gA8y"}],"1lq1c":[function(require,module,exports) {
 var define;
 /**
 * @license
@@ -30480,7 +30521,7 @@ var define;
   });
 });
 
-},{}],"5SKJw":[function(require,module,exports) {
+},{}],"6cdvr":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _three = require('three');
@@ -31567,48 +31608,6 @@ module.exports = function( THREE ) {
 	return OrbitControls;
 };
 
-},{}],"5gA8y":[function(require,module,exports) {
-"use strict";
-
-exports.interopDefault = function (a) {
-  return a && a.__esModule ? a : {
-    default: a
-  };
-};
-
-exports.defineInteropFlag = function (a) {
-  Object.defineProperty(a, '__esModule', {
-    value: true
-  });
-};
-
-exports.exportAll = function (source, dest) {
-  Object.keys(source).forEach(function (key) {
-    if (key === 'default' || key === '__esModule') {
-      return;
-    } // Skip duplicate re-exports when they have the same value.
-
-
-    if (key in dest && dest[key] === source[key]) {
-      return;
-    }
-
-    Object.defineProperty(dest, key, {
-      enumerable: true,
-      get: function () {
-        return source[key];
-      }
-    });
-  });
-  return dest;
-};
-
-exports.export = function (dest, destName, get) {
-  Object.defineProperty(dest, destName, {
-    enumerable: true,
-    get: get
-  });
-};
 },{}],"55aGJ":[function(require,module,exports) {
 var v1 = require('./v1');
 var v4 = require('./v4');

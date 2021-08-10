@@ -1,30 +1,3 @@
-import Entity from './setup'
+import Agent from './entities/Agent';
 
-class Agent extends Entity {
-    constructor() {
-        super({inGroup: true});
-    }
-
-    Start() {
-        super.Start();
-    }
-
-    Update(time) {
-    }
-
-    BuildMesh() {
-        this.geometry = new THREE.CylinderGeometry(0, 4, 8, 10);
-        this.geometry.rotateX(THREE.Math.degToRad(90))
-        this.material = new THREE.MeshNormalMaterial();
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
-    }
-}
-
-new Agent();
-window.addEventListener('mousedown', () => {
-    document.getElementById('description').className = "dimmed"
-})
-window.addEventListener('mouseup', () => document.getElementById('description').className = "")
-
-
-
+new Agent({x: 3, y: 4, z: 4});

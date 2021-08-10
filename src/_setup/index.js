@@ -19,13 +19,12 @@ export const scene = new Scene();
  * @class Entity
  */
 export default class Entity {
-  constructor(options = {name: '', inGroup: false}) {
+  constructor(options = { inGroup: false }) {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
 
     this._id = uuidv4();
     this._scene = scene;
-    this.name = options.name || '';
     this.inGroup = options.inGroup || false;
 
     this.Start()
@@ -41,7 +40,7 @@ export default class Entity {
   Start() {
     if (this.constructor == Entity)
       throw new Error("Abstract classes can't be instantiated.");
-    
+
     this.BuildMesh()
     this._scene.Add(this)
   }
